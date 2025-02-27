@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="upload-container" [class.active]="isDragging" (click)="fileInput.click()">
+    <input type="file" #fileInput hidden (change)="onFileSelected($event)" accept="video/*">
+    <div class="upload-content">
+      <span class="material-icons-outlined">upload</span>
+      <h3>Click to upload video</h3>
+      <p>MP4, AVI, MKV, or MOV (Max 100MB)</p>
+    </div>
+  </div>
+
+  <div class="video-preview" *ngIf="videoUrl">
+    <video controls [src]="videoUrl">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>

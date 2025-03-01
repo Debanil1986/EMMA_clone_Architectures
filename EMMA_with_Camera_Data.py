@@ -52,17 +52,33 @@ object_detector = load_pretrained_object_detector()  # Load the model at the sta
 # In[1]:
 
 
+import threading
 from tqdm import tqdm
 import os
 from flask import Flask, request, redirect, url_for,jsonify
+from flask_cors import CORS,cross_origin
 from werkzeug.utils import secure_filename
 import asyncio
+from asgiref.wsgi import WsgiToAsgi
+import time
+
 
 cnn_feature_dim = 512
 intent_dim = 10
 historical_state_dim = 4
 hidden_size = 512
 resized_width, resized_height = 640, 480
+
+app = Flask(__name__)
+CORS(app)
+
+UPLOAD_FOLDER = './'
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
+
+progress_updates = []
+output_video_bytes = None
 
 
 class EMMA:
@@ -176,7 +192,8 @@ def preprocess_frame_for_torch(frame):
     return tensor_frame
 
 
-async def process_video(video_path, output_video_path, model, intent_dim, historical_state_dim):
+def process_video(video_path, output_video_path, model, intent_dim, historical_state_dim):
+    global progress_updates
     cap = cv2.VideoCapture(video_path)
     lengthOfFrames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if not cap.isOpened():
@@ -229,7 +246,8 @@ async def process_video(video_path, output_video_path, model, intent_dim, histor
 
         out.write(frame)
         pbar.update(1)
-        await asyncio.sleep(0)
+        progress_updates.append(f"Processed frame {len(progress_updates)}/{lengthOfFrames}")
+        time.sleep(0.1)
 
     cap.release()
     print(f"Output video saved to {output_video_path}")
@@ -239,18 +257,16 @@ async def process_video(video_path, output_video_path, model, intent_dim, histor
 
 
 
-app = Flask(__name__)
-UPLOAD_FOLDER = './'
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
+
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/convert-video-to-base64',methods=['POST'])
-def convert_video_to_base64():
+async def convert_video_to_base64():
+    global progress_updates
+    progress_updates = []
     emma_model = EMMA(cnn_feature_dim, intent_dim, historical_state_dim, hidden_size)  # Initialize the EMMA model
     print(request.files)
     if 'video' not in request.files:
@@ -261,16 +277,15 @@ def convert_video_to_base64():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     video_path ='input.mp4'
     output_video_path = 'emma_processed_videos.mp4'
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_in_executor(None, lambda: asyncio.run(process_video(video_path, output_video_path, emma_model, intent_dim, historical_state_dim)))
     
-    
-
-    return jsonify({"message": "Processing started"}), 202
+    process_video(video_path, output_video_path, emma_model, intent_dim, historical_state_dim)
+    # t = threading.Thread(target=process_video, args=(video_path, output_video_path, emma_model, intent_dim, historical_state_dim))
+    # t.start()
+    return jsonify({"message": "Video processing started"}), 202
 
 if __name__ == "__main__":
-    app.run(debug=False,port=3000)
+    # asgi_app = WsgiToAsgi(app)
+    app.run(port=3000)
 
 # In[ ]:
 

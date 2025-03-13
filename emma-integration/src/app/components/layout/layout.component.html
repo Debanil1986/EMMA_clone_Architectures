@@ -8,9 +8,8 @@
     </div>
   </div>
 
-  <div class="video-preview" *ngIf="videoUrl">
-    <video controls [src]="videoUrl">
-      Your browser does not support the video tag.
-    </video>
-  </div>
+  <video class="video-preview" *ngIf="videoUrl" width="320" height="240" controls>
+    <source [src]="videoUrl" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
 </div>

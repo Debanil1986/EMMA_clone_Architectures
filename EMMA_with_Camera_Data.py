@@ -61,6 +61,7 @@ from werkzeug.utils import secure_filename
 import asyncio
 from asgiref.wsgi import WsgiToAsgi
 import time
+import base64
 
 
 cnn_feature_dim = 512
@@ -71,14 +72,13 @@ resized_width, resized_height = 640, 480
 
 app = Flask(__name__)
 CORS(app)
-
+output_video_bytes = None
 UPLOAD_FOLDER = './'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
 
 progress_updates = []
-output_video_bytes = None
 
 
 class EMMA:
@@ -281,7 +281,24 @@ async def convert_video_to_base64():
     process_video(video_path, output_video_path, emma_model, intent_dim, historical_state_dim)
     # t = threading.Thread(target=process_video, args=(video_path, output_video_path, emma_model, intent_dim, historical_state_dim))
     # t.start()
-    return jsonify({"message": "Video processing started"}), 202
+    return jsonify({"message": "Video processing completed"}), 202
+
+@app.route('/progress',methods=['GET'])
+def getProgress():
+    global progress_updates
+    return jsonify({"message": "Progress :"+','.join(progress_updates)}),102
+
+@app.route('/download',methods=['GET'])
+def sendDownload():
+    output_video_path = 'emma_processed_videos.mp4'
+    with open(output_video_path, 'rb') as file:
+        binary_data = file.read()
+
+    
+    response = app.make_response(binary_data)
+    response.headers.set('Content-Type', 'video/mp4')
+    # response.headers.set('Content-Disposition', 'attachment', filename='output_file.txt')
+    return response
 
 if __name__ == "__main__":
     # asgi_app = WsgiToAsgi(app)

@@ -18,9 +18,7 @@ export class AimodelService {
     return this.http.post<ResponseData>('http://127.0.0.1:3000/convert-video-to-base64', formData);
   }
 
-  downloadFile():Observable<Blob>{
-    return this.http.get("'http://127.0.0.1:3000/download", { responseType: 'arraybuffer' }).pipe(
-      map(response => new Blob([response], { type: 'video/mp4' }))
-    );
+  downloadFile():Observable<any>{
+    return this.http.get("'http://127.0.0.1:3000/download",{ observe:'body',responseType: 'blob' });
   }
 }

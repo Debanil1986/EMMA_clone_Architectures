@@ -8,8 +8,10 @@
     </div>
   </div>
 
-  <video class="video-preview" *ngIf="videoUrl" width="320" height="240" controls>
-    <source [src]="videoUrl" type="video/mp4" />
-    Your browser does not support the video tag.
-  </video>
+  <div *ngIf="videoUrl">
+    <video [src]="videoUrl" controls></video>
+  </div>
+  <div *ngIf="errorMessage">
+    <p class="error">{{ errorMessage }}</p>
+  </div>
 </div>

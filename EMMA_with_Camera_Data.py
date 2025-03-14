@@ -40,10 +40,13 @@ class CustomCNN(nn.Module):
 
 
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from torchvision.models.detection import FasterRCNN_ResNet50_FPN_Weights
+
 
 
 def load_pretrained_object_detector():
-    model = fasterrcnn_resnet50_fpn(pretrained=True)
+    weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
+    model = fasterrcnn_resnet50_fpn(weights=weights)
     model.eval()  # Set the model to evaluation mode
     return model
 
@@ -55,7 +58,7 @@ object_detector = load_pretrained_object_detector()  # Load the model at the sta
 import threading
 from tqdm import tqdm
 import os
-from flask import Flask, request, redirect, url_for,jsonify
+from flask import Flask, request, redirect, url_for,jsonify,send_file
 from flask_cors import CORS,cross_origin
 from werkzeug.utils import secure_filename
 import asyncio
@@ -297,7 +300,7 @@ def sendDownload():
     
     response = app.make_response(binary_data)
     response.headers.set('Content-Type', 'video/mp4')
-    # response.headers.set('Content-Disposition', 'attachment', filename='output_file.txt')
+    response.headers.set('Content-Disposition', 'attachment', filename='output_file.txt')
     return response
 
 if __name__ == "__main__":

@@ -18,27 +18,31 @@ export class LayoutComponent implements OnDestroy {
   videoUrl: SafeUrl | null = null;
   fileUploadSubscription= new Subscription();
   completionSub: Subscription = new Subscription();
+  errorMessage:string="";
 
   constructor(private sanitizer: DomSanitizer,private service: AimodelService) {}
 
   async onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file && file.type.startsWith('video/')) {
-      this.fileUploadSubscription = await this.service.onFileUpload(file).subscribe(response=>{
-        const {message} = response;
+      // this.fileUploadSubscription = await this.service.onFileUpload(file).subscribe(response=>{
+      //   const {message} = response;
 
-        if (message == "Video processing completed"){
-          this.completionSub = this.service.downloadFile().subscribe(responsesub=>{
-            if (responsesub.size === 0) {
-              console.error('Received empty Blob. Check API response.');
-              return;
-            }
+      //   if (message == "Video processing completed"){
+          this.completionSub = this.service.downloadFile().subscribe({
+            next:(responsesub)=>{
+                console.log(responsesub)
 
-            const objectURL = URL.createObjectURL(responsesub); // Convert Blob to URL
-            this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(objectURL);
-          });
-        }
-      });
+                const objectUrl = URL.createObjectURL(responsesub);
+                this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(objectUrl);
+
+          },error:(error)=>{
+              this.errorMessage =error
+              console.error('fetching video problem:', error);
+          }
+    });
+      //   }
+      // });
 
     }
   }

@@ -292,6 +292,7 @@ def getProgress():
     return jsonify({"message": "Progress :"+','.join(progress_updates)}),102
 
 @app.route('/download',methods=['GET'])
+@cross_origin()
 def sendDownload():
     output_video_path = 'emma_processed_videos.mp4'
     with open(output_video_path, 'rb') as file:
@@ -300,7 +301,6 @@ def sendDownload():
     
     response = app.make_response(binary_data)
     response.headers.set('Content-Type', 'video/mp4')
-    response.headers.set('Content-Disposition', 'attachment', filename='output_file.txt')
     return response
 
 if __name__ == "__main__":

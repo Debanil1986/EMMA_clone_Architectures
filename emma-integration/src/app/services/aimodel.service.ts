@@ -15,10 +15,10 @@ export class AimodelService {
     formData.append('title', 'Your Title');
     formData.append('video', videoFile);
 
-    return this.http.post<ResponseData>('http://127.0.0.1:3000/convert-video-to-base64', formData);
+    return this.http.post<ResponseData>("http://127.0.0.1:3000/convert-video-to-base64", formData);
   }
 
   downloadFile():Observable<any>{
-    return this.http.get("'http://127.0.0.1:3000/download",{ observe:'body',responseType: 'blob' });
+    return this.http.get("http://127.0.0.1:3000/download",{ observe:'body',responseType: 'blob' });
   }
 }

@@ -9,7 +9,7 @@
   </div>
 
   <div *ngIf="videoUrl">
-    <video [src]="videoUrl" controls></video>
+    <video [src]="videoUrl" type="video/mp4" controls></video>
   </div>
   <div *ngIf="errorMessage">
     <p class="error">{{ errorMessage }}</p>

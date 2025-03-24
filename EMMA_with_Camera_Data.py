@@ -58,7 +58,7 @@ object_detector = load_pretrained_object_detector()  # Load the model at the sta
 import threading
 from tqdm import tqdm
 import os
-from flask import Flask, request, redirect, url_for,jsonify,send_file
+from flask import Flask, request, jsonify,Response
 from flask_cors import CORS,cross_origin
 from werkzeug.utils import secure_filename
 import asyncio
@@ -286,6 +286,13 @@ async def convert_video_to_base64():
     # t.start()
     return jsonify({"message": "Video processing completed"}), 202
 
+
+def get_video_chunk(file_path, start_byte, end_byte):
+    with open(file_path, 'rb') as f:
+        f.seek(start_byte)
+        chunk_size = end_byte - start_byte + 1
+        return f.read(chunk_size)
+
 @app.route('/progress',methods=['GET'])
 def getProgress():
     global progress_updates
@@ -294,14 +301,46 @@ def getProgress():
 @app.route('/download',methods=['GET'])
 @cross_origin()
 def sendDownload():
-    output_video_path = 'emma_processed_videos.mp4'
-    with open(output_video_path, 'rb') as file:
-        binary_data = file.read()
-
+    # Set the path to the video file
+    video_path = 'emma_processed_videos.mp4'
     
-    response = app.make_response(binary_data)
-    response.headers.set('Content-Type', 'video/mp4')
+    # Get the size of the video file
+    file_size = os.path.getsize(video_path)
+    
+    # Get the range header value from the request
+    range_header = request.headers.get('Range', None)
+    
+    # Check if a range header is present
+    if range_header:
+        # Extract the byte range specified in the header
+        byte_range = range_header.strip().split('=')[1]
+        start_byte, end_byte = byte_range.split('-')
+        # Convert start_byte and end_byte to integers
+        start_byte = int(start_byte)
+        end_byte = int(end_byte) if end_byte else file_size - 1
+        status = 206
+    else:
+        # If no range header is provided, set start_byte to 0 and end_byte to the file size - 1
+        start_byte = 0
+        end_byte = file_size - 1
+        status = 200
+    
+    # Get the video chunk based on the start_byte and end_byte
+    chunk = get_video_chunk(video_path, start_byte, end_byte)
+    
+    # Create a response with the video chunk
+    response = Response(chunk, status=206, mimetype='video/mp4')
+    
+    if status == 206:
+        # Add content range information to the response headers for partial content
+        response.headers.add('Content-Range', f'bytes {start_byte}-{end_byte}/{file_size}')
+
+        # Indicate that the server supports byte ranges in the response headers
+        response.headers.add('Accept-Ranges', 'bytes')
+    
+    # Return the response
     return response
+    
 
 if __name__ == "__main__":
     # asgi_app = WsgiToAsgi(app)

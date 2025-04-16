@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="upload-container" [class.active]="isDragging" (click)="fileInput.click()">
+    <input type="file" #fileInput hidden (change)="onFileSelected($event)" accept="video/*">
+    <div class="upload-content">
+      <span class="material-icons-outlined">upload</span>
+      <h3>Click to upload video</h3>
+      <p>MP4, AVI, MKV, or MOV (Max 100MB)</p>
+    </div>
+  </div>
+
+  <div *ngIf="videoUrl" class="video">
+    <video  [src]="videoUrl" type="video/mp4" autoplay controls></video>
+    <!-- <img [src]="videoUrl" type="video/mp4" autoplay controls> -->
+  </div>
+  <div *ngIf="errorMessage">
+    <p class="error">{{ errorMessage }}</p>
+  </div>
+</div>

@@ -58,9 +58,12 @@ p {
 }
 
 video {
-  width: 100%;
+  width: 80%;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: auto;
+  margin-top: 4vh;
+  margin-left: 10vw;
 }
 
 @media (max-width: 600px) {

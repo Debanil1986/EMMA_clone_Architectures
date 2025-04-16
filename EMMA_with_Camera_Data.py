@@ -58,7 +58,7 @@ object_detector = load_pretrained_object_detector()  # Load the model at the sta
 import threading
 from tqdm import tqdm
 import os
-from flask import Flask, request, jsonify,Response
+from flask import Flask, request, jsonify,Response, send_file
 from flask_cors import CORS,cross_origin
 from werkzeug.utils import secure_filename
 import asyncio
@@ -207,7 +207,7 @@ def process_video(video_path, output_video_path, model, intent_dim, historical_s
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    out = cv2.VideoWriter(output_video_path, cv2.VideoWriter_fourcc(*'XVID'), fps, (frame_width, frame_height))
+    out = cv2.VideoWriter(output_video_path, cv2.VideoWriter_fourcc(*'avc1'), fps, (frame_width, frame_height))
     pbar = tqdm(total=lengthOfFrames, unit="frames")
     while cap.isOpened():
         ret, frame = cap.read()
@@ -304,39 +304,18 @@ def sendDownload():
     # Set the path to the video file
     video_path = 'emma_processed_videos.mp4'
     
-    # Get the size of the video file
-    file_size = os.path.getsize(video_path)
-    
-    # Get the range header value from the request
-    range_header = request.headers.get('Range', None)
-    
-    # Check if a range header is present
-    if range_header:
-        # Extract the byte range specified in the header
-        byte_range = range_header.strip().split('=')[1]
-        start_byte, end_byte = byte_range.split('-')
-        # Convert start_byte and end_byte to integers
-        start_byte = int(start_byte)
-        end_byte = int(end_byte) if end_byte else file_size - 1
-        status = 206
-    else:
-        # If no range header is provided, set start_byte to 0 and end_byte to the file size - 1
-        start_byte = 0
-        end_byte = file_size - 1
-        status = 200
-    
-    # Get the video chunk based on the start_byte and end_byte
-    chunk = get_video_chunk(video_path, start_byte, end_byte)
     
     # Create a response with the video chunk
-    response = Response(chunk, status=206, mimetype='video/mp4')
+    response = send_file(
+        video_path,
+        mimetype='video/mp4',
+        conditional=False,
+        as_attachment=False
+    )
     
-    if status == 206:
-        # Add content range information to the response headers for partial content
-        response.headers.add('Content-Range', f'bytes {start_byte}-{end_byte}/{file_size}')
-
-        # Indicate that the server supports byte ranges in the response headers
-        response.headers.add('Accept-Ranges', 'bytes')
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     
     # Return the response
     return response

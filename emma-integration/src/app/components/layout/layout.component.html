@@ -8,8 +8,9 @@
     </div>
   </div>
 
-  <div *ngIf="videoUrl">
-    <video [src]="videoUrl" type="video/mp4" controls></video>
+  <div *ngIf="videoUrl" class="video">
+    <video  [src]="videoUrl" type="video/mp4" autoplay controls></video>
+    <!-- <img [src]="videoUrl" type="video/mp4" autoplay controls> -->
   </div>
   <div *ngIf="errorMessage">
     <p class="error">{{ errorMessage }}</p>

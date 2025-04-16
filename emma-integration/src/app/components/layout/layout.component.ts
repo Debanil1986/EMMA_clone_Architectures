@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
 })
 export class LayoutComponent implements OnDestroy {
   isDragging = false;
-  videoUrl: SafeUrl | null = null;
+  videoUrl: SafeUrl | any;
   fileUploadSubscription= new Subscription();
   completionSub: Subscription = new Subscription();
   errorMessage:string="";
@@ -26,19 +26,6 @@ export class LayoutComponent implements OnDestroy {
 
 
 
-  private convertBlobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        // Extract Base64 portion from Data URL
-        const base64 = dataUrl.split(',')[1];
-        resolve(`data:video/mp4;base64,${base64}`);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
 
   async onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -51,10 +38,11 @@ export class LayoutComponent implements OnDestroy {
             next:async (responsesub)=>{
                 console.log(responsesub)
                 try{
-                this.objectUrl = await this.convertBlobToBase64(responsesub);
-                console.log('this.objectUrl: ', this.objectUrl);
-                }catch(err){console.error(err)};
-                this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(this.objectUrl);
+                  const webmBlob = new Blob([responsesub], { type: 'video/mp4' })
+                const blobconvert =URL.createObjectURL(webmBlob);
+                this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(blobconvert);
+                console.log(JSON.stringify(this.videoUrl));
+              }catch(err){console.error(err)};
 
           },error:(error)=>{
               this.errorMessage =error
@@ -71,7 +59,7 @@ export class LayoutComponent implements OnDestroy {
    this.fileUploadSubscription.unsubscribe();
    this.completionSub.unsubscribe();
    if (this.objectUrl) {
-    URL.revokeObjectURL(this.objectUrl);
+    URL.revokeObjectURL(this.videoUrl.toString());
   }
   }
 }

@@ -3,7 +3,8 @@
 ---
 
 ## 1. Introduction 🌟  
-**EMMA** (**E**nd to **E**nd **M**ultimodal **A**rchitecture) is an open-source AI framework designed to unify **text, image, audio, and video** processing into a seamless, user-friendly pipeline. Whether you're a researcher, developer, or hobbyist, EMMA simplifies building and deploying cutting-edge multimodal AI applications!  
+**EMMA** (End to End Multimodal Architecture) is an open-source AI software that integrates **text, image, audio, and video** in a single, easy-to-use pipeline. The framework is targeted at all of those: researchers, developers, and hobbyists and helps them to build and deploy state-of-the-art multimodal AI applications with minimal effort!
+
 
 ✨ **Tagline**: *"One model to sense it all, one framework to bind it all!"*  
 
@@ -16,10 +17,9 @@ Here’s how to navigate EMMA’s ecosystem:
 
 
 🚀 **Quick Start**:  
-1. **Install**: `pip install emma-ai`  
-2. **Configure**: Set your API keys in `config.yaml` 🔑  
-3. **Run Demo**: `python demo/image_to_text_generation.py` 🖼️➡️📝  
-4. **Explore**: Tweak hyperparameters in `/models/fusion_engine.py` ⚙️  
+2. **Configure**: Set your API keys in `config.yaml` 🔑  which is hidden
+3. **Run Demo**: `python demo/EMMA_with_Camera_Data.py` 🖼️➡️📝  
+ 
 
 ---
 
@@ -32,21 +32,21 @@ EMMA leverages state-of-the-art techniques:
 - **Ethical AI**: Built-in bias detection using `Fairlearn` 🛡️  
 
 🔬 **Tech Stack**:  
-```python
-# Sample fusion code
-fusion_output = emma.fuse(
-    text=bert_embeddings, 
-    image=vit_features, 
-    strategy="concatenate+attention"
-)
-
-
-
----
+- **Programming Language**: Python 🐍  
+- **Computer Vision**: OpenCV 👁️  
+- **Frontend Framework**: Angular 📐  
+- **Deep Learning Framework**: PyTorch 🔥  
+- **Data Handling**: Pandas, NumPy 📊  
+- **Visualization**: Matplotlib, Seaborn 📈  
+- **Model Deployment**: Flask, FastAPI 🚀  
+- **Package Management**: pip, Conda 📦  
+- **Version Control**: Git, GitHub 🛠️  
+- **Testing**: Pytest 🧪  
+- **Cloud Integration**: AWS, Google Cloud ☁️ (Not Implemented yet) 
+- **Distributed Training**: PyTorch Lightning ⚡  
 
 ### Features:  
 - 🎯 **Unified API**: Consistent interfaces for text, image, audio, and video.  
 - 🧩 **Modular Design**: Swap components like LEGO blocks.  
 - 📊 **Benchmark-Ready**: Preloaded SOTA datasets and evaluation scripts.  
 
-*Made with ❤️ by the EMMA community.*
